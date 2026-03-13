@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÉCLAT | A Arte da Renovação</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@200;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #000000;
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --gold: #bf953f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Impede scroll excessivo */
+            background-color: var(--black);
+            font-family: 'Montserrat', sans-serif;
+            color: white;
+        }
+
+        /* --- SPLASH SCREEN --- */
+        #splash {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--black);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease-out, visibility 1s;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #splash h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 400;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            color: #fff;
+            opacity: 0.8;
+        }
+
+        .btn-abrir {
+            padding: 15px 40px;
+            border: 1px solid var(--gold);
+            background: transparent;
+            color: var(--gold);
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+
+             opacity:0;
+            transform:translateY(10px);
+            transition:all 1s ease;
+        }
+        .btn-abrir.show{
+        opacity:1;
+        transform:translateY(0);
+        }
+
+        /* --- CONTEÚDO PRINCIPAL (OCULTO INICIALMENTE) --- */
+        #main-content {
+            opacity: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: opacity 2s ease-in;
+        }
+
+        /* --- CANVAS DE PARTÍCULAS --- */
+        #canvas-gold {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --- LOGOTIPO --- */
+        header {
+            text-align: center;
+            padding-top: 40px;
+            z-index: 10;
+        }
+
+      .logo-eclat {
+
+font-family: 'Playfair Display', serif;
+font-size: 3.5rem;
+font-weight: 700;
+
+background: linear-gradient(
+90deg,
+#bf953f,
+#fcf6ba,
+#ffffff,
+#fcf6ba,
+#b38728,
+#aa771c
+);
+
+background-size:300%;
+
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+
+letter-spacing:8px;
+
+opacity:0;
+transform: translateY(40px) scale(0.95);
+filter: blur(8px);
+
+transition:
+opacity 2s ease,
+transform 2.2s cubic-bezier(0.23,1,0.32,1),
+filter 2s ease;
+
+animation: brilhoLogo 12s linear infinite;
+
+}
+
+        .subtitle{
+        font-size:0.65rem;
+        letter-spacing:6px;
+        color:var(--gold);
+        margin-top:12px;
+        text-transform:uppercase;
+        opacity:0.9;
+        }
+
+        /* --- CARROSSEL --- */
+        .carousel-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            overflow: hidden;
+            z-index: 5;
+            position: relative;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            height: 70%; 
+            width: 100%;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+         .slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+
+    border-radius:10px;
+
+    box-shadow:
+        0 0 20px rgba(191,149,63,0.4),
+        0 0 40px rgba(252,246,186,0.15),
+        0 20px 50px rgba(0,0,0,0.9);
+
+    transition: transform 6s ease;
+}
+
+.slide.active img {
+    transform: scale(1.05);
+}
+
+        /* --- CONTROLE DE ÁUDIO --- */
+        footer {
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            background: linear-gradient(to top, black, transparent);
+        }
+
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .player-text {
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        /* Animação do Equalizador */
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 15px;
+        }
+
+        .bar {
+            width: 2px;
+            background: var(--gold);
+            height: 20%;
+        }
+
+        .playing .bar {
+            animation: bounce 0.8s ease-in-out infinite alternate;
+        }
+        .bar:nth-child(2) { animation-delay: 0.2s; }
+        .bar:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0% { height: 20%; }
+            100% { height: 100%; }
+        }
+        /* mudança*/
+        @keyframes brilhoLogo {
+
+0%{
+background-position:-200%;
+}
+
+100%{
+background-position:200%;
+}
+
+}
+
+        .hidden { opacity: 0; visibility: hidden; }
+        .texto-splash{
+max-width:320px;
+text-align:center;
+margin-bottom:30px;
+}
+
+.texto-splash .linha{
+opacity:0;
+transform:translateY(10px);
+transition: all 1.5s ease;
+}
+
+.texto-splash .linha.show{
+opacity:1;
+transform:translateY(0);
+}
+    /* MENSAGEM FINAL */
+
+.mensagem-final{
+    text-align:center;
+    padding:40px 20px 60px;
+    max-width:420px;
+    margin:auto;
+}
+
+.linha-final{
+    font-family:'Playfair Display', serif;
+    font-size:1rem;
+    color:#fff;
+    opacity:0.9;
+    margin-bottom:6px;
+}
+
+/* TEXTO FELIZ PÁSCOA COM EFEITO DOURADO */
+
+.feliz-pascoa{
+    font-family:'Playfair Display', serif;
+    font-size:1.4rem;
+    margin-top:20px;
+    letter-spacing:3px;
+
+    background: linear-gradient(
+        90deg,
+        #bf953f,
+        #fcf6ba,
+        #b38728,
+        #fbf5b7,
+        #aa771c
+    );
+
+    background-size:300%;
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    animation: brilhoOuro 6s linear infinite;
+}
+
+@keyframes brilhoOuro{
+
+    0%{
+        background-position:0%;
+    }
+
+    100%{
+        background-position:300%;
+    }
+
+}
+
+/* ASSINATURA */
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Splash Screen -->
+         <div id="splash">
+
+    <div class="texto-splash">
+        <p class="linha">Para quem aprecia o extraordinário.</p>
+
+        <p class="linha">A Páscoa é tempo de renovação,</p>
+        <p class="linha">de carinho</p>
+        <p class="linha">e de gestos que aquecem o coração.</p>
+
+        <p class="linha">Este pequeno gesto foi preparado</p>
+        <p class="linha">com muito cuidado</p>
+        <p class="linha">para tornar o seu momento ainda mais especial.</p>
+    </div>
+
+    <button class="btn-abrir" onclick="iniciarExperiencia()">ABRIR EXPERIÊNCIA</button>
+
+</div>
+
+    <!-- Conteúdo Principal -->
+    <div id="main-content">
+        <canvas id="canvas-gold"></canvas>
+
+        <header>
+            <h1 class="logo-eclat">ÉCLAT</h1>
+            <p class="subtitle">O sabor que transforma momentos.</p>
+        </header>
+       
+
+        <div class="carousel-container" id="swipe-zone">
+            <div class="carousel-track" id="track">
+                <!-- Adicione suas imagens aqui -->
+                <div class="slide active"><img src="assets/foto1.jpeg" alt="Luxury 1"></div>
+                <div class="slide"><img src="assets/foto2.jpeg" alt="Luxury 2"></div>
+                <div class="slide"><img src="assets/foto3.jpeg" alt="Luxury 3"></div>
+                <div class="slide"><img src="assets/foto4.jpeg" alt="Luxury 1"></div>
+                <div class="slide"><img src="assets/foto5.jpeg" alt="Luxury 2"></div>
+                <div class="slide"><img src="assets/foto6.jpeg" alt="Luxury 3"></div>
+            </div>
+        </div>
+        <div class="mensagem-final">
+    <p class="linha-final">Que sua Páscoa seja tão doce</p>
+    <p class="linha-final">quanto este momento.</p>
+
+    <p class="feliz-pascoa">Feliz Páscoa ✨</p>
+
+    
+</div>
+
+        <footer>
+            <div class="audio-player" id="audio-toggle">
+                <div class="visualizer" id="viz">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <span class="player-text" id="player-status">Nossa música</span>
+            </div>
+        </footer>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="assets/musica.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const music = document.getElementById('bg-music');
+        const splash = document.getElementById('splash');
+        const mainContent = document.getElementById('main-content');
+        const playerStatus = document.getElementById('player-status');
+        const viz = document.getElementById('viz');
+
+        // 1. LÓGICA DE INICIALIZAÇÃO
+        function iniciarExperiencia() {
+            splash.classList.add('hidden');
+            mainContent.style.opacity = "1";
+            
+            // Play & Fade-in Áudio
+            music.volume = 0;
+            music.play().catch(()=>{});
+            let vol = 0;
+            const fadeIn = setInterval(() => {
+                if (vol < 0.5) {
+                    vol += 0.05;
+                    music.volume = vol;
+                } else {
+                    clearInterval(fadeIn);
+                }
+            }, 200);
+
+            startParticles();
+            startCarousel();
+            viz.classList.add('playing');
+            // texte //
+             setTimeout(() => {
+
+            const logo = document.querySelector(".logo-eclat");
+
+            logo.style.opacity = "1";
+            logo.style.transform = "translateY(0) scale(1)";
+            logo.style.filter = "blur(0)";
+
+            }, 600);  
+        }         
+
+        // 2. CONTROLE DE ÁUDIO
+        document.getElementById('audio-toggle').addEventListener('click', () => {
+            if (music.paused) {
+                music.play();
+                playerStatus.innerText = "Nossa música";
+                viz.classList.add('playing');
+            } else {
+                music.pause();
+                playerStatus.innerText = "Tocar nossa música";
+                viz.classList.remove('playing');
+            }
+        });
+
+        // 3. ANIMAÇÃO DE PARTÍCULAS (FOLHAS DE OURO)
+        const canvas = document.getElementById('canvas-gold');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function startParticles() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            class Flake {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height - canvas.height;
+                    this.size = Math.random() * 8 + 4;
+                    this.speed = Math.random() * 1 + 0.5;
+                    this.angle = Math.random() * 360;
+                    this.spin = Math.random() * 2 - 1;
+                    this.zigzag = Math.random() * 2;
+                }
+                update() {
+                    this.y += this.speed;
+                    this.x += Math.sin(this.y / 30) * this.zigzag;
+                    this.angle += this.spin;
+                    if (this.y > canvas.height) this.y = -20;
+                }
+                draw() {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle * Math.PI / 180);
+                    ctx.fillStyle = "#bf953f";
+                    ctx.shadowBlur = 5;
+                    ctx.shadowColor = "#fcf6ba";
+                    // Desenha formato irregular
+                    ctx.beginPath();
+                    ctx.moveTo(0,0);
+                    ctx.lineTo(this.size, this.size/2);
+                    ctx.lineTo(this.size/2, this.size);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            for(let i=0; i<30; i++) particles.push(new Flake());
+
+            function animate() {
+                ctx.clearRect(0,0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // 4. CARROSSEL MOBILE-FIRST
+        const track = document.getElementById('track');
+        let index = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function startCarousel() {
+            setInterval(() => {
+                index = (index + 1) % slides.length;
+                updateCarousel();
+            }, 4000);
+        }
+
+        function updateCarousel() {
+
+    slides.forEach(slide => slide.classList.remove("active"));
+
+    slides[index].classList.add("active");
+
+    track.style.transform = `translateX(-${index * 100}%)`;
+}
+
+        // Suporte a Swipe (Arrastar com o dedo)
+        let touchStartX = 0;
+        const swipeZone = document.getElementById('swipe-zone');
+
+        swipeZone.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
+        swipeZone.addEventListener('touchend', e => {
+            let touchEndX = e.changedTouches[0].clientX;
+            if (touchStartX - touchEndX > 50) { // Swipe esquerda
+                index = (index + 1) % slides.length;
+            } else if (touchEndX - touchStartX > 50) { // Swipe direita
+                index = (index - 1 + slides.length) % slides.length;
+            }
+            updateCarousel();
+        });
+            // ANIMAÇÃO DO TEXTO DO SPLASH
+
+const linhas = document.querySelectorAll(".linha");
+const botao = document.querySelector(".btn-abrir");
+
+linhas.forEach((linha, index) => {
+    setTimeout(() => {
+        linha.classList.add("show");
+
+        if(index === linhas.length - 1){
+            setTimeout(()=>{
+                botao.classList.add("show");
+            },1500);
+        }
+
+    }, index * 1200);
+});
+/* teste*/
+    window.addEventListener("resize", () => {
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+})
+        
+    </script>
+</body>
+</html>
