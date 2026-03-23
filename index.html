@@ -15,13 +15,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--black);
-            font-family: 'Montserrat', sans-serif;
-            color: white;
-        }
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; /* Proíbe balançar para os lados */
+    overflow-y: auto;   /* LIBERA a rolagem para cima e para baixo */
+    background-color: var(--black);
+}
 
         /* --- SPLASH SCREEN --- */
         #splash {
@@ -59,7 +58,7 @@
         /* --- CONTEÚDO PRINCIPAL --- */
         #main-content {
             opacity: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -169,7 +168,15 @@
                 width: 90%;
                 height: 95%;
             }
-            .mensagem-final { padding: 20px 10px; }
+            .mensagem-final /*{ padding: 20px 10px; }*/
+            {
+    padding-bottom: 150px; /* Isso cria um 'respiro' lá embaixo */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* Espaço entre a frase e o Feliz Páscoa */
+}
+
         }
 
         /* --- RODAPÉ E ANIMAÇÕES --- */
@@ -211,6 +218,31 @@
             animation: brilhoOuro 6s linear infinite;
         }
         @keyframes brilhoOuro{ 0%{ background-position:0%; } 100%{ background-position:300%; } }
+        /* Para Chrome, Safari e Opera  teste de rolagem*/
+body::-webkit-scrollbar {
+    display: none;
+}
+
+/* Para Firefox e IE/Edge */
+body {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    overflow-y: scroll; /* Permite a rolagem vertical */
+    overflow-x: hidden; /* Garante que não balance para os lados */
+}
+/*rolagem pode apaga se der ruim*/
+/* Estado inicial: Escondido, um pouco abaixo e transparente */
+.revelar {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease-out; /* Velocidade da animação */
+}
+
+/* Estado final: Quando o JavaScript der o comando de 'aparecer' */
+.revelar.ativo {
+    opacity: 1;
+    transform: translateY(0);
+}
     </style>
 </head>
 <body>
@@ -251,8 +283,8 @@
         </div>
 
         <div class="mensagem-final">
-            <p class="linha-final">Que sua Páscoa seja tão doce quanto este momento.</p>
-            <p class="feliz-pascoa">Feliz Páscoa ✨</p>
+           <p class="mensagem-pascoa revelar">Que sua Páscoa seja tão doce quanto este momento.</p>
+<h2 class="feliz-pascoa revelar">Feliz Páscoa ✨</h2>
         </div>
 
         <footer>
@@ -415,6 +447,19 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         });
+
+        const observador = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('ativo');
+        }
+    });
+}, { threshold: 0.1 }); // Começa a animação quando 10% do texto aparece
+
+// Seleciona tudo que tem a classe 'revelar' e começa a vigiar
+document.querySelectorAll('.revelar').forEach((elemento) => {
+    observador.observe(elemento);
+});
     </script>
 </body>
 </html>
